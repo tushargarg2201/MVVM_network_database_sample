@@ -2,6 +2,7 @@ package gargt.words.view;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,8 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import java.util.List;
 
 import gargt.words.R;
 import gargt.words.adapter.WordListAdapter;
@@ -44,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        mWordViewModel.getAllWords().observe(this, new Observer<List<Word>>() {
+        mWordViewModel.getAllWords().observe(this, new Observer<PagedList<Word>>() {
             @Override
-            public void onChanged(@Nullable List<Word> words) {
+            public void onChanged(@Nullable PagedList<Word> words) {
                 adapter.setWords(words);
             }
         });

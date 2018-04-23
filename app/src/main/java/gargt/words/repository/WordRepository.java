@@ -2,10 +2,10 @@ package gargt.words.repository;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import java.util.List;
 
 import gargt.words.Dao.WordDao;
 import gargt.words.Database.WordRoomDatabase;
@@ -14,18 +14,22 @@ import gargt.words.model.Word;
 public class WordRepository {
 
     private WordDao mWordDao;
-    private LiveData<List<Word>> mAllWords;
+    private LiveData<PagedList<Word>> mAllWords;
 
     public WordRepository(Application application) {
         WordRoomDatabase db = WordRoomDatabase.getDatabase(application);
         mWordDao = db.wordDao();
-        mAllWords = mWordDao.getAllWords();
+        PagedList.Config pagedListConfig =
+                (new PagedList.Config.Builder()).setEnablePlaceholders(true)
+                        .setPrefetchDistance(10)
+                        .setPageSize(20).build();
+        mAllWords = new LivePagedListBuilder(mWordDao.getAllWords(), pagedListConfig).build();
         Log.i("Tushar", "mAllWords is---> " +mAllWords);
     }
 
     // Room executes all queries on a separate thread.
     // Observed LiveData will notify the observer when the data has changed.
-    public LiveData<List<Word>> getAllWords() {
+    public LiveData<PagedList<Word>> getAllWords() {
         return mAllWords;
     }
 

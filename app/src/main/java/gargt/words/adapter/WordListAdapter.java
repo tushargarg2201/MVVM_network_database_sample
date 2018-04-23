@@ -1,6 +1,10 @@
 package gargt.words.adapter;
 
+import android.arch.paging.AsyncPagedListDiffer;
+import android.arch.paging.PagedList;
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +18,10 @@ import gargt.words.R;
 import gargt.words.model.Word;
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordViewHolder> {
+    private static final String TAG = WordListAdapter.class.getName();
+
+    private final AsyncPagedListDiffer<Word> mDiffer
+            = new AsyncPagedListDiffer(this, DIFF_CALLBACK);
 
     class WordViewHolder extends RecyclerView.ViewHolder {
         private final TextView wordItemView;
@@ -39,24 +47,51 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordVi
 
     @Override
     public void onBindViewHolder(WordViewHolder holder, int position) {
-        Word current = mWords.get(position);
-        Log.i("Tushar", "current.getWord() is---> " +current.getWord());
-        Log.i("Tushar", "current.getMobileNumber() is---> " +current.getMobileNumber());
-        holder.wordItemView.setText(current.getWord());
-        holder.mobileItemView.setText(current.getMobileNumber());
+        //Word current = mWords.get(position);
+        Word current = mDiffer.getItem(position);
+        if (current != null) {
+            Log.i(TAG, "called bindAdapter");
+            holder.wordItemView.setText(current.getWord());
+            holder.mobileItemView.setText(current.getMobileNumber());
+        } else {
+            Log.i(TAG, "holder needs to be clear");
+        }
+
     }
 
-    public void setWords(List<Word> words){
-        mWords = words;
-        notifyDataSetChanged();
+    public void setWords(PagedList<Word> words) {
+        mDiffer.submitList(words);
     }
 
     // getItemCount() is called many times, and when it is first called,
     // mWords has not been updated (means initially, it's null, and we can't return null).
     @Override
     public int getItemCount() {
-        if (mWords != null)
-            return mWords.size();
-        else return 0;
+        if (mDiffer != null) {
+            return mDiffer.getItemCount();
+        }
+        return 0;
     }
+
+    public static final DiffUtil.ItemCallback<Word> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<Word>() {
+                @Override
+                public boolean areItemsTheSame(
+                        @NonNull Word oldWord, @NonNull Word newWord) {
+                    // User properties may have changed if reloaded from the DB, but ID is fixed
+                    boolean areItemsSame = false;
+                    if (oldWord.getWord() == newWord.getWord()) {
+                        areItemsSame = true;
+                    }
+                    Log.i(TAG, "areItems the same called ---> " + areItemsSame);
+                    return true;
+                }
+
+                @Override
+                public boolean areContentsTheSame(Word oldWord, Word newWord) {
+                    boolean areContentsSame = oldWord.equals(newWord);
+                    Log.i(TAG, "Are contents the same called ---> " + areContentsSame);
+                    return oldWord.equals(newWord);
+                }
+    };
 }
