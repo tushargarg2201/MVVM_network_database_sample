@@ -1,5 +1,6 @@
 package gargt.words.view;
 
+import android.app.ProgressDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.arch.paging.PagedList;
@@ -18,13 +19,14 @@ import android.widget.Toast;
 
 import gargt.words.R;
 import gargt.words.adapter.WordListAdapter;
-import gargt.words.model.Word;
+import gargt.words.model.Movie;
 import gargt.words.viewmodel.WordViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
     private WordViewModel mWordViewModel;
     public static final int NEW_WORD_ACTIVITY_REQUEST_CODE = 1;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.show();
 
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
@@ -40,15 +44,25 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mWordViewModel = ViewModelProviders.of(this).get(WordViewModel.class);
+        if (mWordViewModel.getAllMovies() != null) {
+            mWordViewModel.getAllMovies().observe(this, new Observer<PagedList<Movie>>() {
+                @Override
+                public void onChanged(@Nullable PagedList<Movie> movies) {
+                    progressDialog.hide();
+                    adapter.setWords(movies);
+                }
+            });
+        }
 
 
 
-        mWordViewModel.getAllWords().observe(this, new Observer<PagedList<Word>>() {
-            @Override
-            public void onChanged(@Nullable PagedList<Word> words) {
-                adapter.setWords(words);
-            }
-        });
+
+//        mWordViewModel.getAllWords().observe(this, new Observer<PagedList<Word>>() {
+//            @Override
+//            public void onChanged(@Nullable PagedList<Word> words) {
+//                adapter.setWords(words);
+//            }
+//        });
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -66,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == NEW_WORD_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            Word word = new Word(data.getStringExtra(NewWordActivity.EXTRA_REPLY), data.getStringExtra(NewWordActivity.EXTRA_MOBILE_NUMBER));
-            mWordViewModel.insert(word);
+            //Word word = new Word(data.getStringExtra(NewWordActivity.EXTRA_REPLY), data.getStringExtra(NewWordActivity.EXTRA_MOBILE_NUMBER));
+            //mWordViewModel.insert(word);
         } else {
             Toast.makeText(
                     getApplicationContext(),

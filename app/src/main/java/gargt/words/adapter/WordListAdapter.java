@@ -3,9 +3,9 @@ package gargt.words.adapter;
 import android.arch.paging.AsyncPagedListDiffer;
 import android.arch.paging.PagedList;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +15,13 @@ import android.widget.TextView;
 import java.util.List;
 
 import gargt.words.R;
+import gargt.words.model.Movie;
 import gargt.words.model.Word;
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordViewHolder> {
     private static final String TAG = WordListAdapter.class.getName();
 
-    private final AsyncPagedListDiffer<Word> mDiffer
+    private final AsyncPagedListDiffer<Movie> mDiffer
             = new AsyncPagedListDiffer(this, DIFF_CALLBACK);
 
     class WordViewHolder extends RecyclerView.ViewHolder {
@@ -48,19 +49,23 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordVi
     @Override
     public void onBindViewHolder(WordViewHolder holder, int position) {
         //Word current = mWords.get(position);
-        Word current = mDiffer.getItem(position);
+        Movie current = mDiffer.getItem(position);
         if (current != null) {
             Log.i(TAG, "called bindAdapter");
-            holder.wordItemView.setText(current.getWord());
-            holder.mobileItemView.setText(current.getMobileNumber());
+            if (!TextUtils.isEmpty(current.getTitle())) {
+                holder.wordItemView.setText(current.getTitle());
+            }
+            if (!TextUtils.isEmpty(current.getThumbnailUrl())) {
+                holder.mobileItemView.setText(current.getThumbnailUrl());
+            }
         } else {
             Log.i(TAG, "holder needs to be clear");
         }
 
     }
 
-    public void setWords(PagedList<Word> words) {
-        mDiffer.submitList(words);
+    public void setWords(PagedList<Movie> movie) {
+        mDiffer.submitList(movie);
     }
 
     // getItemCount() is called many times, and when it is first called,
@@ -73,25 +78,16 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordVi
         return 0;
     }
 
-    public static final DiffUtil.ItemCallback<Word> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Word>() {
-                @Override
-                public boolean areItemsTheSame(
-                        @NonNull Word oldWord, @NonNull Word newWord) {
-                    // User properties may have changed if reloaded from the DB, but ID is fixed
-                    boolean areItemsSame = false;
-                    if (oldWord.getWord() == newWord.getWord()) {
-                        areItemsSame = true;
-                    }
-                    Log.i(TAG, "areItems the same called ---> " + areItemsSame);
-                    return true;
-                }
+    public static final DiffUtil.ItemCallback<Movie> DIFF_CALLBACK = new DiffUtil.ItemCallback<Movie>() {
+        @Override
+        public boolean areItemsTheSame(Movie oldItem, Movie newItem) {
+            return oldItem.getTitle() == newItem.getTitle();
+        }
 
-                @Override
-                public boolean areContentsTheSame(Word oldWord, Word newWord) {
-                    boolean areContentsSame = oldWord.equals(newWord);
-                    Log.i(TAG, "Are contents the same called ---> " + areContentsSame);
-                    return oldWord.equals(newWord);
-                }
+        @Override
+        public boolean areContentsTheSame(Movie oldItem, Movie newItem) {
+            return oldItem.equals(newItem);
+        }
     };
+
 }

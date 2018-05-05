@@ -5,12 +5,14 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
+import gargt.words.Dao.MovieDao;
 import gargt.words.Dao.WordDao;
-import gargt.words.model.Word;
+import gargt.words.model.Movie;
 
-@Database(entities = {Word.class}, version = 3)
+@Database(entities = {Movie.class}, version = 4)
 public abstract class WordRoomDatabase extends RoomDatabase {
     public abstract WordDao wordDao();
+    public abstract MovieDao movieDao();
 
     private static WordRoomDatabase INSTANCE;
 
@@ -18,7 +20,7 @@ public abstract class WordRoomDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (WordRoomDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), WordRoomDatabase.class, "word_database").build();
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), WordRoomDatabase.class, "movie_database").build();
                 }
             }
         }
